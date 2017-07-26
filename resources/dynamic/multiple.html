@@ -1,0 +1,55 @@
+{%
+Dim useList    =  (CurrentADC.PropValue("useList") = "1") ' Convert to boolean
+Dim inputName
+Dim inputValue
+Dim splitCaption
+Dim caption
+Dim ariaLabel
+Dim resource
+
+Dim i
+If useList Then
+ 
+    inputName = CurrentQuestion.InputName("list") %}
+    <select name="{%= inputName %}" multiple="multiple">
+        {% 
+        Dim attrSelected
+        For i = 1 To CurrentQuestion.AvailableResponses.Count 
+            attrSelected = On(CurrentQuestion.AvailableResponses[i].IsSelected, "selected=\"selected\"", "")
+            inputValue  = CurrentQuestion.AvailableResponses[i].InputValue()
+            splitCaption = CurrentQuestion.AvailableResponses[i].Caption.Split("|") 
+        	caption      = splitCaption[1] 
+        %}
+        <option value="{%= inputValue %}">{%= caption %}</option>
+        {% Next %}
+    </select>
+{% Else %}
+    <ul>
+        {% 
+        Dim inputId
+        Dim attrChecked
+		Dim exclusive
+        For i = 1 To CurrentQuestion.AvailableResponses.Count
+            inputName   = CurrentQuestion.AvailableResponses[i].InputName()
+            inputId     = inputName.Replace(" ", "_").Replace("M", "askia-input")
+            inputValue  = CurrentQuestion.AvailableResponses[i].InputValue()
+            attrChecked = On(CurrentQuestion.AvailableResponses[i].IsSelected, "checked=\"checked\"", "")
+    		exclusive = On(CurrentQuestion.AvailableResponses[i].IsExclusive, "class=\"askia-exclusive\"", "")
+            splitCaption = CurrentQuestion.AvailableResponses[i].Caption.Split("|") 
+        	caption      = splitCaption[1] 
+    		ariaLabel      = splitCaption[2] 
+    		resource = CurrentQuestion.AvailableResponses[i].ResourceURL
+        %}
+        <li class="askia-response">
+            <input type="checkbox" name="{%= inputName %}" aria-label="{%= ariaLabel %}" id="{%= inputId %}" {%:= attrChecked %} {%:= exclusive %} />
+            <label for="{%= inputId %}" class="askia-checkbox"></label>
+            <label for="{%= inputId %}" class="askia-response-label">
+                {% IF (resource <> "") Then %}
+					<img src="{%= resource %}" style="vertical-align:middle" />
+            	{% EndIf %}
+                {%= caption %}
+            </label>
+        </li>
+        {% Next %}
+    </ul>
+{% EndIf %}
